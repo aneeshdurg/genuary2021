@@ -1,4 +1,7 @@
-async function main(canvas) {
+let volume = 0;
+let enable_mic = false;
+let enable_clock = false;
+function main(canvas) {
     const ctx = canvas.getContext("2d");
     canvas.width = 1000;
     canvas.height = 1000;
@@ -34,37 +37,6 @@ async function main(canvas) {
         }
     }
 
-    let volume = 0;
-    try {
-        // https://stackoverflow.com/a/52952907
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        const audioContext = new AudioContext();
-        const analyzer = audioContext.createAnalyser();
-        const microphone = audioContext.createMediaStreamSource(stream);
-        const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-        analyzer.smoothingTimeConstant = 0.8;
-        analyzer.fftSize = 1024;
-
-        microphone.connect(analyzer);
-        analyzer.connect(javascriptNode);
-        javascriptNode.connect(audioContext.destination);
-        javascriptNode.onaudioprocess = function() {
-            var array = new Uint8Array(analyzer.frequencyBinCount);
-            analyzer.getByteFrequencyData(array);
-            var values = 0;
-
-            var length = array.length;
-            for (var i = 0; i < length; i++) {
-              values += (array[i]);
-            }
-
-            volume = values / length;
-        }
-    } catch(err) {
-        alert("Error getting audio: ", err);
-    }
-
     const f = (t) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let triangle of triangles) {
@@ -94,11 +66,17 @@ async function main(canvas) {
         }
 
         let clock = Math.sin(t/1000);
-        let should_distort = clock > 0;
+        let value = enable_mic ? (volume / 100) : (enable_clock ? clock : 0);
+        let should_distort = false;
+        if (enable_mic)
+            should_distort = value > 1;
+        if (enable_clock)
+            should_distort = clock > 0;
+
         for (let i = 0; i < points.length; i++) {
             for (let j = 0; j < 2; j++) {
-                if (volume > 100) {
-                    points[i][j] = points[i][j] + (3+(volume / 100)) * (2*Math.random() - 1);
+                if (should_distort) {
+                    points[i][j] = points[i][j] + (3+value) * (2*Math.random() - 1);
                 }  else {
                     let pt = points[i];
                     pt = [orig_points[i][0] - pt[0], orig_points[i][1] - pt[1]];
@@ -115,4 +93,46 @@ async function main(canvas) {
         requestAnimationFrame(f);
     };
     f(0);
+}
+
+let stream = null;
+async function start_microphone() {
+    enable_clock = false;
+    enable_mic = true;
+    if (stream)
+        return;
+    try {
+        // https://stackoverflow.com/a/52952907
+        stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        const audioContext = new AudioContext();
+        const analyzer = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+        analyzer.smoothingTimeConstant = 0.8;
+        analyzer.fftSize = 1024;
+
+        microphone.connect(analyzer);
+        analyzer.connect(javascriptNode);
+        javascriptNode.connect(audioContext.destination);
+        javascriptNode.onaudioprocess = function() {
+            var array = new Uint8Array(analyzer.frequencyBinCount);
+            analyzer.getByteFrequencyData(array);
+            var values = 0;
+
+            var length = array.length;
+            for (var i = 0; i < length; i++) {
+              values += (array[i]);
+            }
+
+            volume = values / length;
+        }
+    } catch(err) {
+        alert("Error getting audio: ", err);
+    }
+}
+
+function start_no_microphone() {
+    enable_mic = false;
+    enable_clock = true;
 }
