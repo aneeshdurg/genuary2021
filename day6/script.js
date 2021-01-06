@@ -37,6 +37,7 @@ function main(canvas) {
         }
     }
 
+    window.vthresh = 100;
     const f = (t) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let triangle of triangles) {
@@ -66,7 +67,7 @@ function main(canvas) {
         }
 
         let clock = Math.sin(t/1000);
-        let value = enable_mic ? (volume / 100) : (enable_clock ? clock : 0);
+        let value = enable_mic ? (volume / window.vthresh) : (enable_clock ? clock : 0);
         let should_distort = false;
         if (enable_mic)
             should_distort = value > 1;
@@ -96,7 +97,7 @@ function main(canvas) {
 }
 
 let stream = null;
-async function start_microphone() {
+async function start_microphone(vdisp, vinput) {
     enable_clock = false;
     enable_mic = true;
     if (stream)
@@ -126,10 +127,18 @@ async function start_microphone() {
             }
 
             volume = values / length;
+            vdisp.innerText = volume;
         }
     } catch(err) {
         alert("Error getting audio: ", err);
     }
+
+    vinput.value = window.vthresh;
+    vinput.addEventListener('change', () => {
+        try {
+            window.vthresh = parseFloat(vinput.value);
+        } catch (e) {}
+    });
 }
 
 function start_no_microphone() {
