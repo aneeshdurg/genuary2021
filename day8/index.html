@@ -1,14 +1,10 @@
 <script src="generate.js"></script>
 <script>
-    window.animate = true;
+    window.animate = false;
     document.addEventListener("DOMContentLoaded", () => {
         // main(document.getElementById('mycanvas'), 7, 0.05);
-        main(document.getElementById('mycanvas'),
-            document.getElementById('Lsystem'), 7, 0);
+        main(document.getElementById('container'));
     });
 </script>
 
-<code id="Lsystem"></code>
-<br>
-<canvas id="mycanvas" style="width: 50%"></canvas>
-
+<div id="container"></div>
