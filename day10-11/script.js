@@ -125,7 +125,9 @@ class AudioTree {
             this.ctx.beginPath();
             this.ctx.moveTo(...pt.position);
             this.ctx.strokeStyle = pt.color;
-            pt.position = pt.position.map((x, i) => x + pt.velocity[i])
+
+            const multiplier = Math.max(Math.min(this.volume / this.vthresh, 2), 0.05)
+            pt.position = pt.position.map((x, i) => x + multiplier * pt.velocity[i])
             this.ctx.lineTo(...pt.position);
             this.ctx.stroke();
 
