@@ -55,17 +55,21 @@ function draw_butterfly(dimensions) {
 }
 
 class RGButterfly {
-    constructor(dimensions) {
-        this.wings = draw_butterfly([50, 50]);
+    flap_count = 0;
+
+    constructor(dimensions, size) {
+        size = size || [50, 50];
+        this.wings = draw_butterfly(size);
         this.src_params = [0, 0, this.wings.width, this.wings.height];
         this.position = [Math.random() * dimensions[0], dimensions[1]];
         this.speed = 4 + Math.random() * 8;
 
         this.wfactor = 1;
         this.decreasing = true;
+        this.size = size;
     }
 
-    draw(ctx) {
+    draw(ctx, stationary, noflap) {
         ctx.drawImage(
             this.wings,
             ...this.src_params,
@@ -85,17 +89,23 @@ class RGButterfly {
         );
         ctx.restore();
 
-        this.position[1] -= this.speed;
-        if (this.decreasing) {
-            if (this.wfactor < 2)
-                this.wfactor += 0.01 * this.speed;
-            else
-                this.decreasing = false;
-        } else {
-            if (this.wfactor > 1)
-                this.wfactor -= 0.01 * this.speed;
-            else
-                this.decreasing = true;
+        if (!stationary)
+            this.position[1] -= this.speed;
+
+        if (!noflap) {
+            if (this.decreasing) {
+                if (this.wfactor < 2)
+                    this.wfactor += 0.01 * this.speed;
+                else
+                    this.decreasing = false;
+            } else {
+                if (this.wfactor > 1)
+                    this.wfactor -= 0.01 * this.speed;
+                else {
+                    this.decreasing = true;
+                    this.flap_count += 1;
+                }
+            }
         }
     }
 }
