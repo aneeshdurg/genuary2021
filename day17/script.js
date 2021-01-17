@@ -86,7 +86,7 @@ class LineArt {
     }
 
     draw(resolver) {
-        for (let i_ = 0; i_ < 1000; i_++) {
+        for (let i_ = 0; i_ < 500; i_++) {
             let start = [this.width, this.height].map(x => Math.floor(Math.random() * x));
 
             // TODO max length
