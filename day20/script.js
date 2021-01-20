@@ -86,6 +86,9 @@ const draw = () => {
 };
 
 function main(canvas) {
+    graph = {};
+    points = [];
+
     canvas.height = 1000;
     canvas.width = 1000;
     ctx = canvas.getContext("2d");
@@ -94,7 +97,7 @@ function main(canvas) {
     ctx.rect(0, 0, 1000, 1000);
     ctx.fill();
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < (2 + Math.random() * 98); i++) {
         points.push([canvas.width, canvas.height].map(x => Math.floor(Math.random() * x)));
     }
 
