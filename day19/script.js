@@ -10,9 +10,9 @@ function to_cartesian(r, theta) {
     return [c[0] + 500, c[1] + 500];
 }
 
-let r = 0;
-let curr = [Math.PI / 2];
 function main(canvas) {
+    let r = 0;
+    let curr = [Math.PI / 2];
     canvas.height = 1000;
     canvas.width = 1000;
     const ctx = canvas.getContext("2d");
@@ -21,7 +21,7 @@ function main(canvas) {
     ctx.rect(0, 0, 1000, 1000);
     ctx.fill();
 
-    const draw = () => {
+    const draw = async () => {
         let next_point = 0;
         if (window.record_frames) {
             window.record_frames--;
@@ -66,6 +66,8 @@ function main(canvas) {
                 ctx.beginPath();
                 ctx.arc(...end, 1, 0, 2 * Math.PI);
                 ctx.stroke();
+
+                await new Promise(r => setTimeout(r, 0));
             }
         }
         curr = next;
